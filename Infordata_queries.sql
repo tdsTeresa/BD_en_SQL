@@ -1,9 +1,9 @@
 
 
----CREACIÓN DE BASE DE DATOS
+---CREACIÃ“N DE BASE DE DATOS
 CREATE DATABASE INFORDATA
 
----CREACIÓN DE TABLAS E IMPORTACIÓN DE DATOS
+---CREACIÃ“N DE TABLAS 
 --Tabla Productos
 
 CREATE TABLE Productos (CodigoProducto int not null identity,
@@ -65,7 +65,7 @@ CREATE TABLE Alquiler (CodigoProducto int not null, PrecioHora decimal (10,2),
 
 
 
---Tabla Soporte Técnico
+--Tabla Soporte TÃ©cnico
 CREATE TABLE SoporteTecnico (IdSoporte int not null identity,
 								IdEmpresa int not null, 
 								CodigoProducto int not null,
@@ -86,7 +86,7 @@ CREATE TABLE Fabricante (IdEmpresa int not null identity,
 
 
 
---Tabla Alta tecnología
+--Tabla Alta tecnologÃ­a
 CREATE TABLE AltaTecnologia (CodigoProducto int not null,
 							IdEmpresa int not null,
 							FechaFabricacion Date,
@@ -95,7 +95,7 @@ CREATE TABLE AltaTecnologia (CodigoProducto int not null,
 
 
 
----FINALIZA CREACIÓN DE TABLAS E IMPORTACIÓN DE DATOS
+---FINALIZA CREACIÃ“N DE TABLAS 
 
 ---CONSULTAS A LA BASE DE DATOS
 
@@ -105,18 +105,18 @@ Select pr.NIFProveedor, pr.Nombre, p.Descripcion from Productos p
 		Order by pr.Nombre, p.Descripcion
 
 
-----Precio de alquiler por hora sólo para monitores y discos duros
+----Precio de alquiler por hora sÃ³lo para monitores y discos duros
 select p.Modelo,
-		LEFT(p.Descripcion, 20) as Descripción,
-		ISNULL(p.ResolucionMaximaK,'No Disponible') as Resolución,
+		LEFT(p.Descripcion, 20) as DescripciÃ³n,
+		ISNULL(p.ResolucionMaximaK,'No Disponible') as ResoluciÃ³n,
 		ISNULL(p.CapacidadTB, 'No Disponible') as Capacidad, 
 		a.PrecioHora from Productos p 
 		inner join Alquiler a on a.CodigoProducto=p.CodigoProducto where p.Descripcion like '%Monitor%' or p.Descripcion like'%Disco Duro%'
 
 
-----Algunos productos pertenecen a la categoría de Alta tecnología
+----Algunos productos pertenecen a la categorÃ­a de Alta tecnologÃ­a
 Select p.Descripcion, f.Nombre as Fabricante, f.PaisOrigen,
-		ISNULL(CONVERT(varchar, a.FechaFabricacion), 'No Disponible') as FechaFabricación
+		ISNULL(CONVERT(varchar, a.FechaFabricacion), 'No Disponible') as FechaFabricaciÃ³n
 		from AltaTecnologia a 
 		inner join Productos p on  p.CodigoProducto= a.CodigoProducto
 		inner join Fabricante f on f.IdEmpresa=a.IdEmpresa
@@ -129,7 +129,7 @@ Select c.DNICliente,
 		concat(c.Nombre, ' ', c.ApellidoPaterno, ' ',  c.ApellidoMaterno)as Nombre, 
 		c.Telefono, c.Domicilio, m.Fecha, p.Descripcion, 
 		(p.Precio * m.Cantidad) as TotalVenta,
-		ISNULL(convert(varchar, (s.Precio * m.Cantidad)), 'No') as TotalServicioTécnico
+		ISNULL(convert(varchar, (s.Precio * m.Cantidad)), 'No') as TotalServicioTÃ©cnico
 		from Movimientos m 
 		left join Productos p on p.CodigoProducto=m.CodigoProducto
 		left join Clientes c on c.DNICliente= m.DNICliente
@@ -138,7 +138,7 @@ Select c.DNICliente,
 		order by m.Fecha
 
 
- -- Sólo se puede ofrecer servicio técnico a clientes que han adquirido el producto.
+ -- SÃ³lo se puede ofrecer servicio tÃ©cnico a clientes que han adquirido el producto.
  GO
 	CREATE OR ALTER PROC RegistrarSoporte
     @CodigoProducto int, 
@@ -156,7 +156,7 @@ Select c.DNICliente,
 			VALUES (@CodigoProducto, @DNICliente, @Concepto, getdate(), NULL, NULL, @Cantidad)
 		END
 
-		--Verificar si el servicio de Soporte Técnico existe para el producto solicitado
+		--Verificar si el servicio de Soporte TÃ©cnico existe para el producto solicitado
     ELSE IF @Concepto = 'Soporte' and @idSoporte in (Select IdSoporte from SoporteTecnico) and @CodigoProducto in (Select CodigoProducto from SoporteTecnico)
     BEGIN  
 		--Verificar si el producto ha sido adquirido antes por el mismo cliente
@@ -164,7 +164,7 @@ Select c.DNICliente,
 					WHERE DNICliente = @DNICliente and  
 							CodigoProducto=@CodigoProducto 
 										and Concepto='Venta')
-        BEGIN  --Registrar servicio de Soporte Técnico en la tabla 'Movimientos'
+        BEGIN  --Registrar servicio de Soporte TÃ©cnico en la tabla 'Movimientos'
            INSERT INTO Movimientos (CodigoProducto,DNICliente,Concepto,Fecha, IdSoporte, HorasAlquiler, Cantidad)
         VALUES (@CodigoProducto, @DNICliente, @Concepto, getdate(), @IdSoporte, NULL, @Cantidad)
             END
@@ -184,3 +184,4 @@ Select c.DNICliente,
 		END 
 
 exec RegistrarSoporte 279, 'RRTBH235HH', 'Soporte', '2025-07-15', 12, null, 1 
+
